@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include "common_dht_read.h"
 
-void usage(void) {
-	fprintf(stderr, "Usage: %s [-o]\n");
+void usage(const char *argv) {
+	fprintf(stderr, "Usage: %s [-o]\n", argv);
 	exit(-1);
 }
 
@@ -25,7 +25,7 @@ int main(int argc, const char *argv[])
                         infinite = false;
                         break;
                 default:
-                        usage();
+                        usage(argv[0]);
                 }
         }
 

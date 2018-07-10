@@ -38,10 +38,11 @@ def GetDistance():
     return distance 
 
 def main():
-    print("### Distance Sensor Starts Working (in StandAlone mode) ###" %mode)
+    print("### Distance Sensor Starts Working (in StandAlone mode) ###")
     try:
         init()
         time.sleep(2)
+        distance = GetDistance()
         print(">>> distance is: %dcm" %distance)
     except KeyboardInterrupt:
         print("### Distance Sensor Ends ###")
