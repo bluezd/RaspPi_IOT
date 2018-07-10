@@ -6,9 +6,9 @@ import random
 import getopt
 import requests
 import subprocess
-import re, sys
+import re, sys, time
 
-from ultrasonic.ultrasonic import *
+from ultrasonic.ultrasonic import Ultrasonic
  
 def doUpdate(payload):
     url = 'http://heng-ge.cn:8080/coldChainLogistics/reportTemperatureLocation.do'
@@ -24,15 +24,15 @@ def updateTem(tem=0):
     payload = {"temperature": str(tem), "locationId": mode}
     res = doUpdate(payload)
     if res == 0:
-        print("--> Update Tem=%s Success" %tem)
+        print("--> Update Tem=%s Success in %s Mode" %(tem, mode))
 
 def updateGPS():
-    num = random.randint(1, 4)
+    num = random.randint(1, 3)
     value = "GPS"+str(num)
     payload = {"locationId": mode}
     res = doUpdate(payload)
     if res == 0:
-        print("--> Update %s Success" %mode)
+        print("--> Update %s Success in %s Mode" %(value, mode))
 
 def getTemHum():
     """docstring for getTemHum"""
@@ -47,11 +47,15 @@ def getTemHum():
         time.sleep(1)
 
 def updateTemInfinite():
-    while True:
-        hum, tem = getTemHum()
-        print("TEM: " +tem)
-        updateTem(tem)
-        time.sleep(10)
+    print("### TEM Sensor Starts Working (in %s mode) ###" %mode)
+    try:
+        while True:
+            hum, tem = getTemHum()
+            print("TEM: " +tem)
+            updateTem(round(float(tem), 2))
+            time.sleep(10)
+    except KeyboardInterrupt:
+        print("### TEM Sensor Ends ###")
 
 def usage():
     """docstring for usage"""
@@ -91,18 +95,18 @@ def main():
     else:
         print("### Distance Sensor Starts Working (in %s mode) ###" %mode)
         try:
-            init()
+            ultra = Ultrasonic()
             time.sleep(2)
             count=0
             while True:
                 print("# Get Distance count %d:" %count)
-                distance = GetDistance()
+                distance = ultra.GetDistance()
                 print(">>> distance is: %dcm" %distance)
                 if distance < 5:
                     if mode.startswith("FREEZER"):
                         hum, tem = getTemHum()
                         print("TEM: " +tem)
-                        updateTem(tem)
+                        updateTem(round(float(tem), 2))
                     elif mode == "GPS":
                         updateGPS()
                     time.sleep(2)
@@ -111,7 +115,7 @@ def main():
         except KeyboardInterrupt:
             print("### Distance Sensor Ends ###")
 
-        GPIO.cleanup()
+        ultra.cleanup()
 
 if __name__ == '__main__':
     main()
