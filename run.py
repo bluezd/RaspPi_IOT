@@ -62,7 +62,7 @@ def updateTemInfinite():
             hum, tem = getTemHum()
             print("TEM: " +tem)
             updateTem(round(float(tem), 2))
-            time.sleep(10)
+            time.sleep(TIME)
     except KeyboardInterrupt:
         print("### TEM Sensor Ends ###")
 
@@ -74,12 +74,14 @@ Usage: %s
            "FREEZER1" <freezer1 mode>
            "FREEZER2" <freezer2 mode>
            "GPS"      <GPS mode>
+        -d <Distance(int)>
+        -t <Time(int)>
     """ %sys.argv[0]
     sys.exit(2)
 
 def main():
     try:
-        ops, args = getopt.getopt(sys.argv[1:], "hm:", ["help", "mode="])
+        ops, args = getopt.getopt(sys.argv[1:], "hm:d:t:", ["help", "mode=", "distance=", "time="])
     except getopt.GetoptError as err:
         print(str(err))
         usage()
@@ -88,20 +90,27 @@ def main():
         print("Invalid Options")
         usage()
 
-    global mode
+    global mode, DISTANCE, TIME
     mode=None
+    DISTANCE=5
+    TIME=60
     for o, a in ops:
-        if o in ('-m', '--mode'):
-            mode = a.strip("=")
-            if mode not in ("CAR", "FREEZER1", "FREEZER2", "GPS"):
-                print("Invalid Options")
+        try:
+            if o in ('-m', '--mode'):
+                mode = a.strip("=")
+            elif o in ('-d', '--distance'):
+                DISTANCE = int(a.strip("="))
+            elif o in ('-t', '--time'):
+                TIME = int(a.strip("="))
+            else:
                 usage()
-        else:
+        except ValueError:
+            print("Value should be Integral not String")
             usage()
 
     if mode == "CAR":
         updateTemInfinite()
-    else:
+    elif mode in ("FREEZER1", "FREEZER2", "GPS"):
         print("### Distance Sensor Starts Working (in %s mode) ###" %mode)
         try:
             ultra = Ultrasonic()
@@ -111,20 +120,23 @@ def main():
                 print("# Get Distance count %d:" %count)
                 distance = ultra.GetDistance()
                 print(">>> distance is: %dcm" %distance)
-                if distance < 5:
+                if distance < DISTANCE:
                     if mode.startswith("FREEZER"):
                         hum, tem = getTemHum()
                         print("TEM: " +tem)
                         updateTem(round(float(tem), 2))
                     elif mode == "GPS":
                         updateGPS()
-                    time.sleep(2)
+                    time.sleep(TIME)
                 time.sleep(1)
                 count+=1
         except KeyboardInterrupt:
             print("### Distance Sensor Ends ###")
 
         ultra.cleanup()
+    else:
+        print('''You must specify "-m" option with value in ("CAR", "FREEZER1", "FREEZER2", "GPS")''')
+        usage()
 
 if __name__ == '__main__':
     main()
