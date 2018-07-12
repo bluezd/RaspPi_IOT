@@ -14,11 +14,20 @@ def doUpdate(payload):
     url = 'http://heng-ge.cn:8080/coldChainLogistics/reportTemperatureLocation.do'
     #payload = {"channel":"xebestorderer","chaincode":"xebest","method":"insertTemandLoc","args":["goods_1234","kevins house","-4C","2018-7-4 11:55"],"chaincodeVer":"v1"}
     headers = {'content-type': 'application/json'}
+    count=0
     while True:
-        response = requests.get(url, data=json.dumps(payload), headers=headers)
-        if json.loads(response.text)["resultCode"] == "Success":
-            return 0
-        time.sleep(1)
+        try:
+            response = requests.get(url, data=json.dumps(payload), headers=headers, timeout=5)
+            if json.loads(response.text)["resultCode"] == "Success":
+                return 0
+        except Exception:
+            count+=1
+            if count > 10:
+                print("--> Ignore Update ...")
+                return -1
+            print("--> Retry (%d) ..." %count)
+
+        time.sleep(2)
 
 def updateTem(tem=0):
     payload = {"temperature": str(tem), "locationId": mode}
