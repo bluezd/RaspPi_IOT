@@ -6,7 +6,7 @@ import random
 import getopt
 import requests
 import subprocess
-import re, sys, time
+import re, sys, time, math
 
 from ultrasonic.ultrasonic import Ultrasonic
  
@@ -38,7 +38,7 @@ def updateTem(tem=0):
 def updateGPS():
     num = random.randint(1, 3)
     value = "GPS"+str(num)
-    payload = {"locationId": mode}
+    payload = {"locationId": value}
     res = doUpdate(payload)
     if res == 0:
         print("--> Update %s Success in %s Mode" %(value, mode))
@@ -61,7 +61,8 @@ def updateTemInfinite():
         while True:
             hum, tem = getTemHum()
             print("TEM: " +tem)
-            updateTem(round(float(tem), 2))
+            #updateTem(round(float(tem), 2))
+            updateTem(int(math.floor(float(tem))))
             time.sleep(TIME)
     except KeyboardInterrupt:
         print("### TEM Sensor Ends ###")
@@ -124,7 +125,8 @@ def main():
                     if mode.startswith("FREEZER"):
                         hum, tem = getTemHum()
                         print("TEM: " +tem)
-                        updateTem(round(float(tem), 2))
+                        #updateTem(round(float(tem), 2))
+                        updateTem(int(math.floor(float(tem))))
                     elif mode == "GPS":
                         updateGPS()
                     time.sleep(TIME)
