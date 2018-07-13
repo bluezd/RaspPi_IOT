@@ -17,7 +17,8 @@ def doUpdate(payload):
     count=0
     while True:
         try:
-            response = requests.get(url, data=json.dumps(payload), headers=headers, timeout=5)
+            #response = requests.get(url, data=json.dumps(payload), headers=headers, timeout=5)
+            response = requests.get(url, params=payload, headers=headers, timeout=5)
             if json.loads(response.text)["resultCode"] == "Success":
                 return 0
         except Exception:
